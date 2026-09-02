@@ -20,7 +20,7 @@ function syncTopicCard(node,topicId,readings,completedNumbers){
  const percent=total?Math.round(completed/total*100):0;
  const topicHeader=node.querySelector('.topicTop > div');
  const topicMeta=topicHeader?.querySelector('.topicMeta')||topicHeader?.querySelector(':scope > span:nth-child(2)');
- if(topicMeta){topicMeta.classList.add('topicMeta');topicMeta.textContent=`${completed}/${total} modules complete`;}
+ if(topicMeta){topicMeta.classList.add('topicMeta');const text=`${completed}/${total} modules complete`;if(topicMeta.textContent!==text)topicMeta.textContent=text;}
  const oldHoursBar=node.querySelector(':scope > .bar');
  if(oldHoursBar)oldHoursBar.style.display='none';
  const oldFooter=node.querySelector(':scope > .topicFooter');
@@ -36,7 +36,8 @@ function syncTopicCard(node,topicId,readings,completedNumbers){
   const fill=document.createElement('span');fill.className='topicModuleFill';
   track.appendChild(fill);moduleProgress.appendChild(track);
   const value=document.createElement('span');value.className='topicModuleValue';moduleProgress.appendChild(value);
-  node.insertBefore(moduleProgress,node.querySelector(':scope > .topicActions')||null);
+  const anchor=node.querySelector(':scope > .topicActions');
+  if(anchor)node.insertBefore(moduleProgress,anchor);else node.appendChild(moduleProgress);
  }
  const fill=moduleProgress.querySelector('.topicModuleFill');
  const value=moduleProgress.querySelector('.topicModuleValue');
@@ -47,17 +48,16 @@ function syncTopicCard(node,topicId,readings,completedNumbers){
  moduleProgress.setAttribute('aria-valuetext',`${completed} of ${total} learning modules complete`);
  if(track)track.setAttribute('aria-hidden','true');
  const status=node.querySelector(':scope > .topicTop > .status');
- if(status){status.classList.add('topicStatusBadge');status.textContent=completed===total?'TOPIC COMPLETE':'TOPIC OPEN';}
+ if(status){status.classList.add('topicStatusBadge');const text=completed===total?'TOPIC COMPLETE':'TOPIC OPEN';if(status.textContent!==text)status.textContent=text;}
 }
 
 function ReadingPanel({title,topicId,readings}){
  const [completed,setCompleted]=useState([]);
  const plannedHours=TOPIC_HOURS[topicId]||0;
- const rawHoursPerReading=readings.length?plannedHours/readings.length:0;
- const hoursPerReading=roundToHalf(rawHoursPerReading);
+ const hoursPerReading=roundToHalf(readings.length?plannedHours/readings.length:0);
  const percent=readings.length?Math.round(completed.length/readings.length*100):0;
  const completedHours=hoursPerReading*completed.length;
- useEffect(()=>{const sync=()=>{const next=readCompleted(topicId,readings);setCompleted([...new Set(next.filter(n=>readings.some(x=>x.number===n)))])};sync();const onChange=e=>{if(e.detail?.topicId===topicId){sync();const parent=document.querySelector(`.topic[data-topic-id="${topicId}"]`);if(parent)syncTopicCard(parent,topicId,readings,readCompleted(topicId,readings));}};window.addEventListener('cfa-reading-progress-change',onChange);return()=>window.removeEventListener('cfa-reading-progress-change',onChange)},[topicId,readings]);
+ useEffect(()=>{const sync=()=>setCompleted(readCompleted(topicId,readings));sync();const onChange=e=>{if(e.detail?.topicId===topicId){sync();const parent=document.querySelector(`.topic[data-topic-id="${topicId}"]`);if(parent)syncTopicCard(parent,topicId,readings,readCompleted(topicId,readings));}};window.addEventListener('cfa-reading-progress-change',onChange);return()=>window.removeEventListener('cfa-reading-progress-change',onChange)},[topicId,readings]);
  const toggleReading=number=>{const next=completed.includes(number)?completed.filter(x=>x!==number):[...completed,number].sort((a,b)=>a-b);setCompleted(next);saveProgress(topicId,readings,next)};
  return <div className="topicReadings">
   <div className="topicReadingsSummary">
@@ -78,25 +78,23 @@ function ReadingPanel({title,topicId,readings}){
 export default function TopicReadingsEnhancer(){
  const [targets,setTargets]=useState([]);
  useEffect(()=>{
+  let lastSignature='';
   const findTargets=()=>{
-   const next=Array.from(document.querySelectorAll('.topicGrid .topic')).map(node=>{
+   const nodes=Array.from(document.querySelectorAll('.topicGrid .topic'));
+   const next=nodes.map(node=>{
     let target=node.querySelector(':scope > .topicReadingsMount');
-    if(!target){target=document.createElement('div');target.className='topicReadingsMount';node.appendChild(target)}
+    if(!target){target=document.createElement('div');target.className='topicReadingsMount';node.appendChild(target);}
     const title=node.querySelector('.topicTitle')?.textContent?.trim()||'';
-    const topicId=TOPIC_IDS[title];
-    if(topicId){
-     node.setAttribute('data-topic-id',topicId);
-     const readings=getReadings(topicId);
-     syncTopicCard(node,topicId,readings,readCompleted(topicId,readings));
-    }
-    return{target,title,topicId};
-   }).filter(x=>x.topicId);
-   setTargets(next);
+    return{target,title,topicId:TOPIC_IDS[title]};
+   }).filter(item=>item.topicId);
+   const signature=next.map(item=>`${item.topicId}:${item.target.isConnected}`).join('|');
+   if(signature!==lastSignature){lastSignature=signature;setTargets(next);}
+   next.forEach(({target,title,topicId})=>{if(topicId){const node=target.parentElement;const readings=getReadings(topicId);syncTopicCard(node,topicId,readings,readCompleted(topicId,readings));}});
   };
   findTargets();
-  const observer=new MutationObserver(findTargets);
+  const observer=new MutationObserver(()=>{findTargets();});
   observer.observe(document.body,{childList:true,subtree:true});
   return()=>observer.disconnect();
  },[]);
- return <>{targets.map(({target,title,topicId})=>createPortal(<ReadingPanel key={`${topicId}-${title}`} title={title} topicId={topicId} readings={getReadings(topicId)}/>,target))}</>;
+ return <>{targets.map(({target,title,topicId})=>target?.isConnected?createPortal(<ReadingPanel key={`${topicId}-${title}`} title={title} topicId={topicId} readings={getReadings(topicId)}/>,target):null)}</>;
 }
