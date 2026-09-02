@@ -1,6 +1,7 @@
 import './globals.css';
 import './components.css';
 import './ui-cleanup.css';
+import './curriculum-readings.css';
 import DataTransfer from './components/DataTransfer';
 import DynamicDateController from './components/DynamicDateController';
 import MockEmptyStateEnhancer from './components/MockEmptyStateEnhancer';
