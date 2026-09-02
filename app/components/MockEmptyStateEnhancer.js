@@ -6,7 +6,6 @@ import {createPortal} from 'react-dom';
 const STORE='cfa-l1-tracker-v10';
 const LEGACY_STORE='cfa-l1-tracker-v9';
 const MOCK_DATES=['2027-06-16','2027-06-21','2027-06-26','2027-07-01','2027-07-06','2027-07-11','2027-07-16','2027-07-21','2027-07-26','2027-08-01','2027-08-05','2027-08-10'];
-
 const freshMocks=()=>MOCK_DATES.map((date,i)=>({id:i+1,date,score:'',done:false,completedAt:''}));
 
 function readMocks(){
@@ -36,7 +35,10 @@ export default function MockEmptyStateEnhancer(){
     const sync=()=>{
       const node=document.querySelector('.chartEmpty');
       if(!node){setTarget(null);return}
-      node.dataset.actionable='true';
+      if(node.dataset.actionable!=='true'){
+        node.dataset.actionable='true';
+        node.textContent='';
+      }
       setTarget(node);
     };
     sync();
@@ -49,8 +51,9 @@ export default function MockEmptyStateEnhancer(){
     if(!open) return;
     const onKeyDown=e=>{if(e.key==='Escape'){e.preventDefault();setOpen(false)}};
     document.addEventListener('keydown',onKeyDown);
+    const previousOverflow=document.body.style.overflow;
     document.body.style.overflow='hidden';
-    return()=>{document.removeEventListener('keydown',onKeyDown);document.body.style.overflow=''};
+    return()=>{document.removeEventListener('keydown',onKeyDown);document.body.style.overflow=previousOverflow};
   },[open]);
 
   const openForm=()=>{
@@ -73,9 +76,9 @@ export default function MockEmptyStateEnhancer(){
 
   return <>
     {createPortal(
-      <div className="actionableEmptyState">
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'10px',width:'100%',textAlign:'center'}}>
         <strong>No completed mock scores yet</strong>
-        <span>Complete a mock and enter its score to start your dated readiness trend.</span>
+        <span style={{maxWidth:'560px',opacity:.72}}>Complete a mock and enter its score to start your dated readiness trend.</span>
         <button type="button" className="primary" onClick={openForm}>Add mock score</button>
       </div>,
       target
@@ -83,6 +86,7 @@ export default function MockEmptyStateEnhancer(){
     {open&&createPortal(
       <div className="modalBackdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="mock-empty-title" aria-describedby="mock-empty-description">
+          <button type="button" className="modalClose" aria-label="Close" onClick={()=>setOpen(false)}>×</button>
           <span className="sectionLabel">COMPLETE MOCK {mockId}</span>
           <h2 id="mock-empty-title">Enter mock score</h2>
           <p id="mock-empty-description">Enter a score from 0 to 100. Today's date will be saved automatically.</p>
