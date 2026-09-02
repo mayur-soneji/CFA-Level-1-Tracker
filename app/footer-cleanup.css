@@ -1,0 +1,5 @@
+/* Clean footer: emphasize the formula and remove the storage-status message. */
+.shell footer{display:block!important;margin:14px 0 8px!important;padding:14px 16px!important;border-top:1px solid rgba(255,255,255,.09)!important;color:#e4ebef!important;font-size:14px!important;font-weight:750!important;line-height:1.5!important;letter-spacing:.01em!important;background:linear-gradient(90deg,rgba(111,144,255,.07),rgba(88,224,207,.035),transparent)!important;border-radius:10px!important}
+.shell footer span:first-child{display:block!important;color:#e4ebef!important;font-size:14px!important;font-weight:750!important}
+.shell footer span:last-child{display:none!important}
+@media(max-width:650px){.shell footer{margin-top:10px!important;padding:12px!important;font-size:12px!important}.shell footer span:first-child{font-size:12px!important}}
