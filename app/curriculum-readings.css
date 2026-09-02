@@ -1,0 +1,17 @@
+.topicReadingsMount{margin-top:11px}
+.topicReadings{border-top:1px solid rgba(255,255,255,.07);padding-top:9px}
+.topicReadingsToggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:transparent;color:#aeb9be;padding:5px 0;text-align:left;font-size:9px}
+.topicReadingsToggle:hover{color:#edf3f4}
+.topicReadingsToggleText{display:flex;align-items:center;gap:8px;min-width:0}
+.topicReadingsToggleText>span:last-child{color:#7f8b93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topicReadingsLabel{font-size:8px!important;letter-spacing:.12em;text-transform:uppercase;color:#909da4!important}
+.topicReadingsChevron{width:20px;height:20px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:rgba(255,255,255,.035);font-size:13px;color:#b8c3c7;flex:none}
+.topicReadingsBody{margin-top:7px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.018);overflow:hidden}
+.topicReadingsHead{display:flex;justify-content:space-between;gap:12px;padding:8px 9px;border-bottom:1px solid rgba(255,255,255,.06);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:#89969d}
+.topicReadingsList{list-style:none;margin:0;padding:0;max-height:290px;overflow:auto}
+.topicReadingsList li{display:grid;grid-template-columns:76px 1fr;gap:9px;align-items:start;padding:8px 9px;border-top:1px solid rgba(255,255,255,.045)}
+.topicReadingsList li:first-child{border-top:0}
+.topicReadingNumber{font-size:8px;letter-spacing:.04em;color:#9db1ff;font-weight:800;white-space:nowrap}
+.topicReadingTitle{font-size:9px;line-height:1.45;color:#aab5ba}
+.topicReadingsList li:hover{background:rgba(255,255,255,.025)}
+@media(max-width:650px){.topicReadingsList li{grid-template-columns:70px 1fr}.topicReadingNumber{font-size:7px}.topicReadingTitle{font-size:8px}.topicReadingsBody{max-height:none}.topicReadingsList{max-height:250px}}
