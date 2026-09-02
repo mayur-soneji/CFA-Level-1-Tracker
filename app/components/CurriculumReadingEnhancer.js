@@ -19,11 +19,14 @@ export default function CurriculumReadingEnhancer() {
 
   useEffect(() => {
     const sync = () => {
-      const nodes = Array.from(document.querySelectorAll('.topic'));
-      const next = nodes
+      const next = Array.from(document.querySelectorAll('.topic'))
         .map((node, index) => ({ node, topicId: topicOrder[index] }))
-        .filter(({ topicId }) => topicId && !nodeHasEnhancer(arguments));
-      setTargets(nodes.map((node, index) => ({ node, topicId: topicOrder[index] })).filter(x => x.topicId));
+        .filter(({ node, topicId }) => {
+          if (!topicId || node.dataset.curriculumEnhanced === 'true') return false;
+          node.dataset.curriculumEnhanced = 'true';
+          return true;
+        });
+      if (next.length) setTargets(current => [...current, ...next]);
     };
 
     const observer = new MutationObserver(sync);
@@ -35,8 +38,9 @@ export default function CurriculumReadingEnhancer() {
   return <>{targets.map(({ node, topicId }) => {
     const modules = getModulesForTopic(topicId);
     if (!modules.length) return null;
+
     return createPortal(
-      <details className="curriculumReadings" key={topicId}>
+      <details className="curriculumReadings" key={`${topicId}-${node.dataset.curriculumKey || 'topic'}`}>
         <summary>
           <span className="curriculumSummaryText">
             <span className="curriculumSummaryLabel">CURRICULUM</span>
@@ -44,7 +48,7 @@ export default function CurriculumReadingEnhancer() {
           </span>
           <span className="curriculumChevron" aria-hidden="true">⌄</span>
         </summary>
-        <ol className="curriculumReadingList" start={modules[0].number}>
+        <ol className="curriculumReadingList">
           {modules.map(module => (
             <li key={module.number}>
               <span className="readingNumber">Reading {String(module.number).padStart(2, '0')}</span>
@@ -56,8 +60,4 @@ export default function CurriculumReadingEnhancer() {
       node
     );
   })}</>;
-}
-
-function nodeHasEnhancer() {
-  return false;
 }
