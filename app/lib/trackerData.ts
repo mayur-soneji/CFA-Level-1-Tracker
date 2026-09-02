@@ -1,4 +1,4 @@
-export const TRACKER_STORAGE_KEY = "cfa-l1-tracker-v8";
+export const TRACKER_STORAGE_KEY = "cfa-l1-tracker-v10";
 export const TRACKER_APP = "cfa-level-1-tracker";
 export const TRACKER_SCHEMA_VERSION = 1;
 
@@ -8,25 +8,13 @@ export interface TrackerState { readDone: string[]; revDone: string[]; mocks: Mo
 export interface TrackerExport { schemaVersion: number; app: typeof TRACKER_APP; exportedAt: string; data: TrackerState; }
 
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-
-function isMockRecord(value: unknown): value is MockRecord {
-  if (!isObject(value)) return false;
-  return typeof value.id === "number" && typeof value.date === "string" && typeof value.score === "string" && typeof value.done === "boolean" && typeof value.completedAt === "string";
-}
-
-function isStudyLog(value: unknown): value is StudyLog {
-  if (!isObject(value)) return false;
-  return (typeof value.id === "string" || typeof value.id === "number") && typeof value.date === "string" && typeof value.hours === "number" && Number.isFinite(value.hours) && typeof value.topic === "string" && typeof value.focus === "string";
-}
-
-export function isTrackerState(value: unknown): value is TrackerState {
-  if (!isObject(value)) return false;
-  return Array.isArray(value.readDone) && value.readDone.every((item) => typeof item === "string") && Array.isArray(value.revDone) && value.revDone.every((item) => typeof item === "string") && Array.isArray(value.mocks) && value.mocks.every(isMockRecord) && Array.isArray(value.logs) && value.logs.every(isStudyLog) && Array.isArray(value.rest) && value.rest.every((item) => typeof item === "string");
-}
+function isMockRecord(value: unknown): value is MockRecord { if (!isObject(value)) return false; return typeof value.id === "number" && typeof value.date === "string" && typeof value.score === "string" && typeof value.done === "boolean" && typeof value.completedAt === "string"; }
+function isStudyLog(value: unknown): value is StudyLog { if (!isObject(value)) return false; return (typeof value.id === "string" || typeof value.id === "number") && typeof value.date === "string" && typeof value.hours === "number" && Number.isFinite(value.hours) && typeof value.topic === "string" && typeof value.focus === "string"; }
+export function isTrackerState(value: unknown): value is TrackerState { if (!isObject(value)) return false; return Array.isArray(value.readDone) && value.readDone.every((item) => typeof item === "string") && Array.isArray(value.revDone) && value.revDone.every((item) => typeof item === "string") && Array.isArray(value.mocks) && value.mocks.every(isMockRecord) && Array.isArray(value.logs) && value.logs.every(isStudyLog) && Array.isArray(value.rest) && value.rest.every((item) => typeof item === "string"); }
 
 export function readTrackerStateFromStorage(): TrackerState {
   if (typeof window === "undefined") throw new Error("Tracker data is only available in the browser.");
-  const raw = window.localStorage.getItem(TRACKER_STORAGE_KEY);
+  const raw = window.localStorage.getItem(TRACKER_STORAGE_KEY) || window.localStorage.getItem("cfa-l1-tracker-v9") || window.localStorage.getItem("cfa-l1-tracker-v8");
   if (!raw) return { readDone: [], revDone: [], mocks: [], logs: [], rest: [] };
   let parsed: unknown;
   try { parsed = JSON.parse(raw); } catch { throw new Error("The saved tracker data is not valid JSON."); }
@@ -42,16 +30,12 @@ export function exportTrackerData(state: TrackerState): void {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = `cfa-level-1-tracker-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  document.body.appendChild(anchor); anchor.click(); anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export async function importTrackerData(file: File): Promise<TrackerState> {
   if (!file) throw new Error("No file selected.");
-  const text = await file.text();
-  let parsed: unknown;
+  const text = await file.text(); let parsed: unknown;
   try { parsed = JSON.parse(text); } catch { throw new Error("The selected file is not valid JSON."); }
   if (!isObject(parsed)) throw new Error("Invalid tracker export.");
   if (parsed.app !== TRACKER_APP) throw new Error("This file is not a CFA Level I Tracker backup.");
