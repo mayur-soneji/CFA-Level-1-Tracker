@@ -8,60 +8,28 @@ import Modal from "./Modal";
 const STORE = "cfa-l1-tracker-v10";
 const LEGACY_STORE = "cfa-l1-tracker-v9";
 const MOCK_DATES = [
-  "2027-06-16",
-  "2027-06-21",
-  "2027-06-26",
-  "2027-07-01",
-  "2027-07-06",
-  "2027-07-11",
-  "2027-07-16",
-  "2027-07-21",
-  "2027-07-26",
-  "2027-08-01",
-  "2027-08-05",
-  "2027-08-10",
+  "2027-06-16", "2027-06-21", "2027-06-26", "2027-07-01",
+  "2027-07-06", "2027-07-11", "2027-07-16", "2027-07-21",
+  "2027-07-26", "2027-08-01", "2027-08-05", "2027-08-10",
 ];
 
-type StoredMock = {
-  id: number;
-  date: string;
-  score: string;
-  done: boolean;
-  completedAt: string;
-};
-
-type StoredState = {
-  mocks?: StoredMock[];
-  [key: string]: unknown;
-};
+type StoredMock = { id: number; date: string; score: string; done: boolean; completedAt: string };
+type StoredState = { mocks?: StoredMock[]; [key: string]: unknown };
 
 function freshMocks(): StoredMock[] {
-  return MOCK_DATES.map((date, index) => ({
-    id: index + 1,
-    date,
-    score: "",
-    done: false,
-    completedAt: "",
-  }));
+  return MOCK_DATES.map((date, index) => ({ id: index + 1, date, score: "", done: false, completedAt: "" }));
 }
 
 function readMocks(): StoredMock[] {
   try {
     const raw = window.localStorage.getItem(STORE) ?? window.localStorage.getItem(LEGACY_STORE);
     const state = raw ? (JSON.parse(raw) as StoredState) : {};
-    if (!Array.isArray(state.mocks)) return freshMocks();
-
     const defaults = freshMocks();
+    if (!Array.isArray(state.mocks)) return defaults;
     return defaults.map((fallback, index) => {
       const value = state.mocks?.[index];
       return value && typeof value === "object"
-        ? {
-            ...fallback,
-            date: typeof value.date === "string" ? value.date : fallback.date,
-            score: value.score == null ? "" : String(value.score),
-            done: Boolean(value.done),
-            completedAt: typeof value.completedAt === "string" ? value.completedAt : "",
-          }
+        ? { ...fallback, date: typeof value.date === "string" ? value.date : fallback.date, score: value.score == null ? "" : String(value.score), done: Boolean(value.done), completedAt: typeof value.completedAt === "string" ? value.completedAt : "" }
         : fallback;
     });
   } catch {
@@ -77,7 +45,18 @@ export default function MockProgressCTA() {
 
   useEffect(() => {
     const findTarget = () => {
-      setTarget(document.querySelector<HTMLDivElement>(".chartEmpty"));
+      const node = document.querySelector<HTMLDivElement>(".chartEmpty");
+      if (!node) {
+        setTarget(null);
+        return;
+      }
+      if (node.dataset.actionable === "true") {
+        setTarget(node);
+        return;
+      }
+      node.dataset.actionable = "true";
+      node.textContent = "";
+      setTarget(node);
     };
 
     findTarget();
@@ -101,17 +80,9 @@ export default function MockProgressCTA() {
     try {
       const currentRaw = window.localStorage.getItem(STORE) ?? window.localStorage.getItem(LEGACY_STORE);
       const current = currentRaw ? (JSON.parse(currentRaw) as StoredState) : {};
-      const mocks = readMocks().map((mock) =>
-        mock.id === mockId
-          ? {
-              ...mock,
-              score: String(numericScore),
-              done: true,
-              completedAt: new Date().toISOString().slice(0, 10),
-            }
-          : mock
-      );
-
+      const mocks = readMocks().map((mock) => mock.id === mockId
+        ? { ...mock, score: String(numericScore), done: true, completedAt: new Date().toISOString().slice(0, 10) }
+        : mock);
       window.localStorage.setItem(STORE, JSON.stringify({ ...current, mocks }));
       setOpen(false);
       window.location.reload();
@@ -160,16 +131,12 @@ export default function MockProgressCTA() {
               type="button"
               onClick={() => setOpen(false)}
               className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-            >
-              Cancel
-            </button>
+            >Cancel</button>
             <button
               type="submit"
               disabled={score === "" || !Number.isFinite(Number(score)) || Number(score) < 0 || Number(score) > 100}
               className="rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-            >
-              Complete mock
-            </button>
+            >Complete mock</button>
           </div>
         </form>
       </Modal>
