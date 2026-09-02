@@ -9,18 +9,43 @@ const TOPIC_IDS={'Quantitative Methods':'quantitativeMethods','Economics':'econo
 const TOPIC_HOURS={quantitativeMethods:32,financialStatementAnalysis:52,fixedIncome:46,corporateFinance:26,equities:44,economics:32,portfolioConstruction:32,derivativesAndRiskManagement:26,alternativeInvestments:22,ethics:48};
 
 function getReadings(topicId){const [start]=readingRanges[topicId]||[1];return(curriculumReadings[topicId]||[]).map((title,index)=>({number:start+index,title}));}
-function readProgress(){try{const raw=window.localStorage.getItem(STORE);const state=raw?JSON.parse(raw):{};return{readDone:Array.isArray(state.readDone)?state.readDone:[],readingDone:state.readingDone&&typeof state.readingDone==='object'?state.readingDone:{}}}catch{return{readDone:[],readingDone:{}}}}
-function readCompleted(topicId,readings){const state=readProgress();const stored=Array.isArray(state.readingDone?.[topicId])?state.readingDone[topicId]:[];if(stored.length)return stored.filter(n=>readings.some(x=>x.number===n));if(state.readDone.includes(topicId))return readings.map(x=>x.number);return[]}
-function saveProgress(topicId,readings,completedNumbers){const current=readProgress();const readDone=new Set(current.readDone);if(completedNumbers.length===readings.length)readDone.add(topicId);else readDone.delete(topicId);try{window.localStorage.setItem(STORE,JSON.stringify({...current,readDone:[...readDone],readingDone:{...current.readingDone,[topicId]:completedNumbers}}));window.dispatchEvent(new CustomEvent('cfa-reading-progress-change',{detail:{topicId,completed:completedNumbers.length,total:readings.length,percent:readings.length?Math.round(completedNumbers.length/readings.length*100):0}}))}catch{}}
+
+function readProgress(){
+ try{
+  const raw=window.localStorage.getItem(STORE);
+  const state=raw?JSON.parse(raw):{};
+  return{readDone:Array.isArray(state.readDone)?state.readDone:[],readingDone:state.readingDone&&typeof state.readingDone==='object'?state.readingDone:{}};
+ }catch{return{readDone:[],readingDone:{}}}
+}
+
+function readCompleted(topicId,readings){
+ const state=readProgress();
+ const stored=Array.isArray(state.readingDone?.[topicId])?state.readingDone[topicId]:[];
+ if(stored.length)return stored.filter(n=>readings.some(x=>x.number===n));
+ if(state.readDone.includes(topicId))return readings.map(x=>x.number);
+ return[];
+}
+
+function saveProgress(topicId,readings,completedNumbers){
+ const current=readProgress();
+ const readDone=new Set(current.readDone);
+ if(completedNumbers.length===readings.length)readDone.add(topicId);else readDone.delete(topicId);
+ try{
+  window.localStorage.setItem(STORE,JSON.stringify({...current,readDone:[...readDone],readingDone:{...current.readingDone,[topicId]:completedNumbers}}));
+  window.dispatchEvent(new CustomEvent('cfa-reading-progress-change',{detail:{topicId}}));
+ }catch{}
+}
+
 function roundToHalf(value){return Math.round(value*2)/2;}
 
-function syncTopicCard(node,topicId,readings,completedNumbers){
+function ensureTopicCard(node,topicId,readings){
+ const completedNumbers=readCompleted(topicId,readings);
  const total=readings.length;
  const completed=completedNumbers.length;
  const percent=total?Math.round(completed/total*100):0;
  const topicHeader=node.querySelector('.topicTop > div');
  const topicMeta=topicHeader?.querySelector('.topicMeta')||topicHeader?.querySelector(':scope > span:nth-child(2)');
- if(topicMeta){topicMeta.classList.add('topicMeta');const text=`${completed}/${total} modules complete`;if(topicMeta.textContent!==text)topicMeta.textContent=text;}
+ if(topicMeta){topicMeta.classList.add('topicMeta');topicMeta.textContent=`${completed}/${total} modules complete`;}
  const oldHoursBar=node.querySelector(':scope > .bar');
  if(oldHoursBar)oldHoursBar.style.display='none';
  const oldFooter=node.querySelector(':scope > .topicFooter');
@@ -30,25 +55,29 @@ function syncTopicCard(node,topicId,readings,completedNumbers){
   moduleProgress=document.createElement('div');
   moduleProgress.className='topicModuleProgress';
   moduleProgress.setAttribute('role','progressbar');
-  moduleProgress.setAttribute('aria-valuemin','0');
-  moduleProgress.setAttribute('aria-valuemax',String(total));
-  const track=document.createElement('span');track.className='topicModuleTrack';
-  const fill=document.createElement('span');fill.className='topicModuleFill';
-  track.appendChild(fill);moduleProgress.appendChild(track);
-  const value=document.createElement('span');value.className='topicModuleValue';moduleProgress.appendChild(value);
-  const anchor=node.querySelector(':scope > .topicActions');
-  if(anchor)node.insertBefore(moduleProgress,anchor);else node.appendChild(moduleProgress);
+  const track=document.createElement('span');
+  track.className='topicModuleTrack';
+  const fill=document.createElement('span');
+  fill.className='topicModuleFill';
+  track.appendChild(fill);
+  moduleProgress.appendChild(track);
+  const value=document.createElement('span');
+  value.className='topicModuleValue';
+  moduleProgress.appendChild(value);
+  node.insertBefore(moduleProgress,node.querySelector(':scope > .topicActions')||null);
  }
  const fill=moduleProgress.querySelector('.topicModuleFill');
  const value=moduleProgress.querySelector('.topicModuleValue');
  const track=moduleProgress.querySelector('.topicModuleTrack');
  if(fill)fill.style.width=`${percent}%`;
  if(value)value.textContent=`${completed}/${total} modules · ${percent}%`;
+ moduleProgress.setAttribute('aria-valuemin','0');
+ moduleProgress.setAttribute('aria-valuemax',String(total));
  moduleProgress.setAttribute('aria-valuenow',String(completed));
  moduleProgress.setAttribute('aria-valuetext',`${completed} of ${total} learning modules complete`);
  if(track)track.setAttribute('aria-hidden','true');
  const status=node.querySelector(':scope > .topicTop > .status');
- if(status){status.classList.add('topicStatusBadge');const text=completed===total?'TOPIC COMPLETE':'TOPIC OPEN';if(status.textContent!==text)status.textContent=text;}
+ if(status){status.classList.add('topicStatusBadge');status.textContent=completed===total?'TOPIC COMPLETE':'TOPIC OPEN';}
 }
 
 function ReadingPanel({title,topicId,readings}){
@@ -57,8 +86,18 @@ function ReadingPanel({title,topicId,readings}){
  const hoursPerReading=roundToHalf(readings.length?plannedHours/readings.length:0);
  const percent=readings.length?Math.round(completed.length/readings.length*100):0;
  const completedHours=hoursPerReading*completed.length;
- useEffect(()=>{const sync=()=>setCompleted(readCompleted(topicId,readings));sync();const onChange=e=>{if(e.detail?.topicId===topicId){sync();const parent=document.querySelector(`.topic[data-topic-id="${topicId}"]`);if(parent)syncTopicCard(parent,topicId,readings,readCompleted(topicId,readings));}};window.addEventListener('cfa-reading-progress-change',onChange);return()=>window.removeEventListener('cfa-reading-progress-change',onChange)},[topicId,readings]);
- const toggleReading=number=>{const next=completed.includes(number)?completed.filter(x=>x!==number):[...completed,number].sort((a,b)=>a-b);setCompleted(next);saveProgress(topicId,readings,next)};
+ useEffect(()=>{
+  const sync=()=>setCompleted(readCompleted(topicId,readings));
+  sync();
+  const onChange=e=>{if(e.detail?.topicId===topicId)sync();};
+  window.addEventListener('cfa-reading-progress-change',onChange);
+  return()=>window.removeEventListener('cfa-reading-progress-change',onChange);
+ },[topicId,readings]);
+ const toggleReading=number=>{
+  const next=completed.includes(number)?completed.filter(x=>x!==number):[...completed,number].sort((a,b)=>a-b);
+  setCompleted(next);
+  saveProgress(topicId,readings,next);
+ };
  return <div className="topicReadings">
   <div className="topicReadingsSummary">
    <div className="topicReadingsSummaryMain"><span className="topicReadingsLabel">READING TRACKER</span><strong>{completed.length} / {readings.length} complete</strong></div>
@@ -70,7 +109,20 @@ function ReadingPanel({title,topicId,readings}){
   </div>
   <div className="topicReadingsBody">
    <div className="topicReadingsHead"><span>{title} · READINGS</span><span>{hoursPerReading.toFixed(1)}h est. / reading</span></div>
-   <ol className="topicReadingsList">{readings.map(reading=>{const done=completed.includes(reading.number);return <li key={reading.number} className={done?'isComplete':''}><label className="topicReadingCheck"><input type="checkbox" checked={done} onChange={()=>toggleReading(reading.number)} aria-label={`Mark Reading ${String(reading.number).padStart(2,'0')}: ${reading.title} complete`}/><span className="topicReadingCheckBox" aria-hidden="true"/><span className="topicReadingNumber">Reading {String(reading.number).padStart(2,'0')}</span><span className="topicReadingTitle">{reading.title}</span><span className="topicReadingHours">{hoursPerReading.toFixed(1)}h</span></label></li>})}</ol>
+   <ol className="topicReadingsList">
+    {readings.map(reading=>{
+     const done=completed.includes(reading.number);
+     return <li key={reading.number} className={done?'isComplete':''}>
+      <label className="topicReadingCheck">
+       <input type="checkbox" checked={done} onChange={()=>toggleReading(reading.number)} aria-label={`Mark Reading ${String(reading.number).padStart(2,'0')}: ${reading.title} complete`}/>
+       <span className="topicReadingCheckBox" aria-hidden="true"/>
+       <span className="topicReadingNumber">Reading {String(reading.number).padStart(2,'0')}</span>
+       <span className="topicReadingTitle">{reading.title}</span>
+       <span className="topicReadingHours">{hoursPerReading.toFixed(1)}h</span>
+      </label>
+     </li>;
+    })}
+   </ol>
   </div>
  </div>;
 }
@@ -78,23 +130,38 @@ function ReadingPanel({title,topicId,readings}){
 export default function TopicReadingsEnhancer(){
  const [targets,setTargets]=useState([]);
  useEffect(()=>{
-  let lastSignature='';
-  const findTargets=()=>{
+  let lastSignature=null;
+  let scheduled=false;
+  const scan=()=>{
+   scheduled=false;
    const nodes=Array.from(document.querySelectorAll('.topicGrid .topic'));
-   const next=nodes.map(node=>{
+   const items=nodes.map(node=>{
+    const title=node.querySelector('.topicTitle')?.textContent?.trim()||'';
+    return{node,title,topicId:TOPIC_IDS[title]};
+   }).filter(item=>item.topicId);
+   const signature=items.map(item=>`${item.topicId}:${item.title}`).join('|');
+   if(signature===lastSignature)return;
+   lastSignature=signature;
+   if(!items.length){setTargets([]);return;}
+   const next=items.map(({node,title,topicId})=>{
     let target=node.querySelector(':scope > .topicReadingsMount');
     if(!target){target=document.createElement('div');target.className='topicReadingsMount';node.appendChild(target);}
-    const title=node.querySelector('.topicTitle')?.textContent?.trim()||'';
-    return{target,title,topicId:TOPIC_IDS[title]};
-   }).filter(item=>item.topicId);
-   const signature=next.map(item=>`${item.topicId}:${item.target.isConnected}`).join('|');
-   if(signature!==lastSignature){lastSignature=signature;setTargets(next);}
-   next.forEach(({target,title,topicId})=>{if(topicId){const node=target.parentElement;const readings=getReadings(topicId);syncTopicCard(node,topicId,readings,readCompleted(topicId,readings));}});
+    const readings=getReadings(topicId);
+    node.setAttribute('data-topic-id',topicId);
+    ensureTopicCard(node,topicId,readings);
+    return{target,title,topicId};
+   });
+   setTargets(next);
   };
-  findTargets();
-  const observer=new MutationObserver(()=>{findTargets();});
+  const requestScan=()=>{
+   if(scheduled)return;
+   scheduled=true;
+   window.requestAnimationFrame(scan);
+  };
+  requestScan();
+  const observer=new MutationObserver(requestScan);
   observer.observe(document.body,{childList:true,subtree:true});
   return()=>observer.disconnect();
  },[]);
- return <>{targets.map(({target,title,topicId})=>target?.isConnected?createPortal(<ReadingPanel key={`${topicId}-${title}`} title={title} topicId={topicId} readings={getReadings(topicId)}/>,target):null)}</>;
+ return <>{targets.map(({target,title,topicId})=>createPortal(<ReadingPanel key={`${topicId}-${title}`} title={title} topicId={topicId} readings={getReadings(topicId)}/>,target))}</>;
 }
