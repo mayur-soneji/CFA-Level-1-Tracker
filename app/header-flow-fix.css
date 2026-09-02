@@ -1,0 +1,5 @@
+/* Header/navigation flow fix: the navigation must not cover page content while scrolling. */
+.nav{position:relative!important;top:auto!important;z-index:20!important}
+/* Keep the navigation above adjacent content without removing it from normal document flow. */
+.topbar{position:relative;z-index:21}
+.hero{position:relative;z-index:1}
