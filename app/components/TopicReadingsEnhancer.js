@@ -11,10 +11,15 @@ const TOPIC_HOURS={quantitativeMethods:32,financialStatementAnalysis:52,fixedInc
 function getReadings(topicId){const [start]=readingRanges[topicId]||[1];return(curriculumReadings[topicId]||[]).map((title,index)=>({number:start+index,title}));}
 function readProgress(){try{const raw=window.localStorage.getItem(STORE);const state=raw?JSON.parse(raw):{};return{readDone:Array.isArray(state.readDone)?state.readDone:[],readingDone:state.readingDone&&typeof state.readingDone==='object'?state.readingDone:{}}}catch{return{readDone:[],readingDone:{}}}}
 function saveProgress(topicId,readings,completedNumbers){const current=readProgress();const readDone=new Set(current.readDone);if(completedNumbers.length===readings.length)readDone.add(topicId);else readDone.delete(topicId);try{window.localStorage.setItem(STORE,JSON.stringify({...current,readDone:[...readDone],readingDone:{...current.readingDone,[topicId]:completedNumbers}}));window.dispatchEvent(new CustomEvent('cfa-reading-progress-change',{detail:{topicId}}))}catch{}}
+function roundToHalf(value){return Math.round(value*2)/2;}
 
 function ReadingPanel({title,topicId,readings}){
  const [open,setOpen]=useState(false),[completed,setCompleted]=useState([]);
- const plannedHours=TOPIC_HOURS[topicId]||0, hoursPerReading=readings.length?plannedHours/readings.length:0, percent=readings.length?Math.round(completed.length/readings.length*100):0, completedHours=hoursPerReading*completed.length;
+ const plannedHours=TOPIC_HOURS[topicId]||0;
+ const rawHoursPerReading=readings.length?plannedHours/readings.length:0;
+ const hoursPerReading=roundToHalf(rawHoursPerReading);
+ const percent=readings.length?Math.round(completed.length/readings.length*100):0;
+ const completedHours=hoursPerReading*completed.length;
  useEffect(()=>{const sync=()=>{const state=readProgress();const stored=Array.isArray(state.readingDone?.[topicId])?state.readingDone[topicId]:[];const legacy=state.readDone.includes(topicId);const next=legacy&&stored.length===0?readings.map(x=>x.number):stored;setCompleted([...new Set(next.filter(n=>readings.some(x=>x.number===n)))])};sync();const onChange=e=>{if(e.detail?.topicId===topicId)sync()};window.addEventListener('cfa-reading-progress-change',onChange);return()=>window.removeEventListener('cfa-reading-progress-change',onChange)},[topicId,readings]);
  const toggleReading=number=>{const next=completed.includes(number)?completed.filter(x=>x!==number):[...completed,number].sort((a,b)=>a-b);setCompleted(next);saveProgress(topicId,readings,next)};
  return <div className="topicReadings">
