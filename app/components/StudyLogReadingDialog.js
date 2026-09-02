@@ -16,6 +16,7 @@ const TOPICS = {
   portfolioConstruction: 'Portfolio Construction',
   derivativesAndRiskManagement: 'Derivatives and Risk Management',
   alternativeInvestments: 'Alternative Investments',
+  portfolioConstruction: 'Portfolio Construction',
   ethics: 'Ethical and Professional Standards',
 };
 
@@ -68,6 +69,7 @@ function updateReadingProgress(topicId, readingNumber, completed) {
 }
 
 function setNativeValue(input, value) {
+  if (!input) return;
   const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
   setter?.call(input, value);
   input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -95,6 +97,12 @@ export default function StudyLogReadingDialog() {
       if (focusLabel && focusInput) {
         focusLabel.classList.add('readingDialogField');
         focusLabel.setAttribute('data-label', 'Reading');
+
+        // The old Focus / notes label is no longer part of the Study Log UI.
+        Array.from(focusLabel.childNodes).forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) node.textContent = '';
+        });
+
         focusInput.dataset.readingFocusInput = 'true';
         focusInput.setAttribute('aria-hidden', 'true');
         focusInput.tabIndex = -1;
@@ -111,16 +119,6 @@ export default function StudyLogReadingDialog() {
         }
       }
 
-      const onSubmit = (event) => {
-        if (targetForm.dataset.readingDialogBypass === 'true') {
-          delete targetForm.dataset.readingDialogBypass;
-          return;
-        }
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        openForForm(targetForm);
-      };
-
       const openForForm = (target) => {
         const select = target.querySelector('select');
         const selectedTopic = select?.value || 'quantitativeMethods';
@@ -131,6 +129,16 @@ export default function StudyLogReadingDialog() {
         setStatus(completed.includes(selected[0]?.number) ? 'completed' : 'incomplete');
         setForm(target);
         setOpen(true);
+      };
+
+      const onSubmit = (event) => {
+        if (targetForm.dataset.readingDialogBypass === 'true') {
+          delete targetForm.dataset.readingDialogBypass;
+          return;
+        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openForForm(targetForm);
       };
 
       targetForm.addEventListener('submit', onSubmit, true);
@@ -162,7 +170,6 @@ export default function StudyLogReadingDialog() {
   const confirm = () => {
     if (!selectedReading) return;
 
-    // Keep the main Study Log subject state synchronized with the subject selected here.
     const subjectSelect = form.querySelector('select');
     if (subjectSelect && subjectSelect.value !== topicId) setNativeValue(subjectSelect, topicId);
 
