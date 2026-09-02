@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getDaysRemaining, isReadingOverdue } from "../lib/dateUtils";
 
 const EXAM_DATE_STORE = "cfa-l1-exam-date-v1";
@@ -46,11 +46,6 @@ export default function DynamicDateController() {
   const [examDate, setExamDate] = useState(DEFAULT_EXAM_DATE);
   const [countElement, setCountElement] = useState<HTMLElement | null>(null);
 
-  const daysRemaining = useMemo(
-    () => Math.max(0, getDaysRemaining(examDate)),
-    [examDate]
-  );
-
   useEffect(() => {
     setExamDate(getStoredExamDate());
     setCountElement(document.querySelector<HTMLElement>(".count"));
@@ -71,20 +66,24 @@ export default function DynamicDateController() {
       const count = document.querySelector<HTMLElement>(".count");
       if (count) {
         const value = count.querySelector<HTMLElement>("strong");
-        const meta = count.querySelector<HTMLElement>(".dynamicExamMeta");
+        const originalMeta = [...count.querySelectorAll<HTMLElement>("span")].find(
+          (element) => !element.closest(".dynamicExamControl")
+        );
 
-        if (value && value.textContent !== String(daysRemaining)) {
-          value.textContent = String(daysRemaining);
+        if (value && value.textContent !== String(Math.max(0, getDaysRemaining(examDate)))) {
+          value.textContent = String(Math.max(0, getDaysRemaining(examDate)));
         }
 
-        if (meta) {
-          const label = `${daysRemaining === 1 ? "day" : "days"} to exam`;
-          if (meta.textContent !== label) meta.textContent = label;
+        if (originalMeta) {
+          originalMeta.classList.add("dynamicExamMeta");
+          const label = `${Math.max(0, getDaysRemaining(examDate)) === 1 ? "day" : "days"} to exam`;
+          if (originalMeta.textContent !== label) originalMeta.textContent = label;
         }
       }
 
-      const nextLabel = [...document.querySelectorAll<HTMLElement>(".sectionLabel")]
-        .find((element) => element.textContent?.trim() === "NEXT TOPIC");
+      const nextLabel = [...document.querySelectorAll<HTMLElement>(".sectionLabel")].find(
+        (element) => element.textContent?.trim() === "NEXT TOPIC"
+      );
       const panel = nextLabel?.closest<HTMLElement>(".panel");
       if (!panel) return;
 
@@ -100,6 +99,20 @@ export default function DynamicDateController() {
           const badge = document.createElement("span");
           badge.className = "dynamicOverdueBadge";
           badge.setAttribute("role", "status");
+          badge.style.cssText = [
+            "display:inline-flex",
+            "align-items:center",
+            "gap:6px",
+            "margin-left:auto",
+            "padding:7px 10px",
+            "border:1px solid rgba(251,191,36,.38)",
+            "border-radius:999px",
+            "background:rgba(245,158,11,.09)",
+            "color:#fcd34d",
+            "font-size:10px",
+            "font-weight:800",
+            "white-space:nowrap",
+          ].join(";");
           const daysLate = overdueDays(endDate);
           badge.textContent = `Overdue by ${daysLate} ${daysLate === 1 ? "day" : "days"}`;
           panel.querySelector(".panelHead")?.appendChild(badge);
@@ -122,13 +135,33 @@ export default function DynamicDateController() {
       observer.disconnect();
       window.clearInterval(timer);
     };
-  }, [examDate, daysRemaining]);
+  }, [examDate]);
 
   if (!countElement) return null;
 
   return createPortal(
-    <label className="dynamicExamControl">
-      <span className="dynamicExamControlLabel">Exam date</span>
+    <label
+      className="dynamicExamControl"
+      style={{
+        display: "block",
+        marginTop: "8px",
+        textAlign: "left",
+      }}
+    >
+      <span
+        className="dynamicExamControlLabel"
+        style={{
+          display: "block",
+          marginBottom: "4px",
+          color: "#88959d",
+          fontSize: "9px",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: ".08em",
+        }}
+      >
+        Exam date
+      </span>
       <input
         type="date"
         value={examDate}
@@ -136,6 +169,18 @@ export default function DynamicDateController() {
         onChange={(event) => {
           const value = event.target.value;
           if (isValidIsoDate(value)) setExamDate(value);
+        }}
+        style={{
+          width: "100%",
+          minWidth: "145px",
+          boxSizing: "border-box",
+          padding: "7px 8px",
+          border: "1px solid rgba(255,255,255,.12)",
+          borderRadius: "9px",
+          background: "rgba(0,0,0,.16)",
+          color: "#edf2f3",
+          fontSize: "10px",
+          outline: "none",
         }}
       />
     </label>,
