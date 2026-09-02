@@ -1,3 +1,4 @@
+import './tailwind.css';
 import './globals.css';
 import './components.css';
 import DataTransfer from './components/DataTransfer';
