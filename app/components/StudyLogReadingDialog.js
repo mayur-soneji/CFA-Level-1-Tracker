@@ -22,16 +22,26 @@ const TOPICS = {
 function getTopicReadings(topicId) {
   const titles = curriculumReadings[topicId] || [];
   const [start] = readingRanges[topicId] || [1];
-  return titles.map((title, index) => ({
-    number: start + index,
-    title,
-  }));
+  return titles.map((title, index) => ({ number: start + index, title }));
+}
+
+function getState() {
+  try {
+    const raw = window.localStorage.getItem(STORE);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getCompletedReading(topicId) {
+  const values = getState().readingDone?.[topicId];
+  return Array.isArray(values) ? values : [];
 }
 
 function updateReadingProgress(topicId, readingNumber, completed) {
   try {
-    const raw = window.localStorage.getItem(STORE);
-    const state = raw ? JSON.parse(raw) : {};
+    const state = getState();
     const readingDone = state.readingDone && typeof state.readingDone === 'object' ? { ...state.readingDone } : {};
     const current = Array.isArray(readingDone[topicId]) ? [...readingDone[topicId]] : [];
     const next = completed
@@ -53,19 +63,15 @@ function updateReadingProgress(topicId, readingNumber, completed) {
       detail: { topicId, readingNumber, completed },
     }));
   } catch {
-    // Keep study-session logging functional even if local storage is unavailable.
+    // Study-session logging remains usable if storage is temporarily unavailable.
   }
 }
 
-function getCompletedReading(topicId) {
-  try {
-    const raw = window.localStorage.getItem(STORE);
-    const state = raw ? JSON.parse(raw) : {};
-    const values = state.readingDone?.[topicId];
-    return Array.isArray(values) ? values : [];
-  } catch {
-    return [];
-  }
+function setNativeValue(input, value) {
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+  setter?.call(input, value);
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 export default function StudyLogReadingDialog() {
@@ -74,21 +80,21 @@ export default function StudyLogReadingDialog() {
   const [topicId, setTopicId] = useState('quantitativeMethods');
   const [readingNumber, setReadingNumber] = useState(1);
   const [status, setStatus] = useState('completed');
-
   const readings = useMemo(() => getTopicReadings(topicId), [topicId]);
   const selectedReading = readings.find((reading) => reading.number === readingNumber) || readings[0];
   const topicName = TOPICS[topicId] || topicId;
 
   useEffect(() => {
-    const findForm = () => document.querySelector('.logForm');
     const attach = () => {
-      const targetForm = findForm();
+      const targetForm = document.querySelector('.logForm');
       if (!targetForm || targetForm.dataset.readingDialogBound === 'true') return;
-
       targetForm.dataset.readingDialogBound = 'true';
+
       const focusLabel = targetForm.querySelector('.wide');
       const focusInput = focusLabel?.querySelector('input');
       if (focusLabel && focusInput) {
+        focusLabel.classList.add('readingDialogField');
+        focusLabel.setAttribute('data-label', 'Reading');
         focusInput.dataset.readingFocusInput = 'true';
         focusInput.setAttribute('aria-hidden', 'true');
         focusInput.tabIndex = -1;
@@ -99,18 +105,8 @@ export default function StudyLogReadingDialog() {
           trigger = document.createElement('button');
           trigger.type = 'button';
           trigger.className = 'readingDialogTrigger';
-          trigger.textContent = 'Choose reading…';
-          trigger.addEventListener('click', () => {
-            const select = targetForm.querySelector('select');
-            const selectedTopic = select?.value || 'quantitativeMethods';
-            const selected = getTopicReadings(selectedTopic);
-            const completed = getCompletedReading(selectedTopic);
-            setTopicId(selectedTopic);
-            setReadingNumber(selected[0]?.number || 1);
-            setStatus(completed.includes(selected[0]?.number) ? 'completed' : 'incomplete');
-            setForm(targetForm);
-            setOpen(true);
-          });
+          trigger.textContent = 'Choose a reading…';
+          trigger.addEventListener('click', () => openForForm(targetForm));
           focusLabel.appendChild(trigger);
         }
       }
@@ -122,15 +118,18 @@ export default function StudyLogReadingDialog() {
         }
         event.preventDefault();
         event.stopImmediatePropagation();
+        openForForm(targetForm);
+      };
 
-        const select = targetForm.querySelector('select');
+      const openForForm = (target) => {
+        const select = target.querySelector('select');
         const selectedTopic = select?.value || 'quantitativeMethods';
         const selected = getTopicReadings(selectedTopic);
         const completed = getCompletedReading(selectedTopic);
         setTopicId(selectedTopic);
         setReadingNumber(selected[0]?.number || 1);
         setStatus(completed.includes(selected[0]?.number) ? 'completed' : 'incomplete');
-        setForm(targetForm);
+        setForm(target);
         setOpen(true);
       };
 
@@ -143,7 +142,7 @@ export default function StudyLogReadingDialog() {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      const targetForm = findForm();
+      const targetForm = document.querySelector('.logForm');
       targetForm?._readingDialogCleanup?.();
       if (targetForm) delete targetForm.dataset.readingDialogBound;
     };
@@ -158,28 +157,25 @@ export default function StudyLogReadingDialog() {
   if (!open || !form || typeof document === 'undefined') return null;
 
   const close = () => setOpen(false);
+  const completed = getCompletedReading(topicId);
 
   const confirm = () => {
     if (!selectedReading) return;
+
+    // Keep the main Study Log subject state synchronized with the subject selected here.
+    const subjectSelect = form.querySelector('select');
+    if (subjectSelect && subjectSelect.value !== topicId) setNativeValue(subjectSelect, topicId);
 
     updateReadingProgress(topicId, selectedReading.number, status === 'completed');
 
     const focusInput = form.querySelector('input[data-reading-focus-input="true"]');
     const statusLabel = status === 'completed' ? 'Completed' : 'Incomplete';
-    const focusValue = `Reading ${String(selectedReading.number).padStart(2, '0')} — ${selectedReading.title} — ${statusLabel}`;
-    if (focusInput) {
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(focusInput, focusValue);
-      focusInput.dispatchEvent(new Event('input', { bubbles: true }));
-      focusInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }
+    setNativeValue(focusInput, `Reading ${String(selectedReading.number).padStart(2, '0')} — ${selectedReading.title} — ${statusLabel}`);
 
     form.dataset.readingDialogBypass = 'true';
     setOpen(false);
     form.requestSubmit();
   };
-
-  const completed = getCompletedReading(topicId);
 
   return createPortal(
     <div className="modalBackdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
