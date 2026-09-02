@@ -1,0 +1,8 @@
+/* Final readiness pill normalization. */
+.heroSummary>span{display:flex!important;align-items:center!important;gap:8px!important;min-width:156px!important;grid-template-columns:none!important;white-space:nowrap!important}
+.heroSummary .legendDot,.heroSummary .legendDot.first,.heroSummary .legendDot.rev,.heroSummary .legendDot.mock{display:inline-block!important;flex:0 0 8px!important;width:8px!important;min-width:8px!important;height:8px!important;min-height:8px!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;box-shadow:none!important}
+.heroSummary .legendDot.first{background:var(--blue)!important}.heroSummary .legendDot.rev{background:var(--cyan)!important}.heroSummary .legendDot.mock{background:var(--purple)!important}
+.heroSummary>span{font-size:12px!important;color:#dce5e8!important}
+.heroSummary .heroMetric{font-size:12px!important;font-weight:750!important;line-height:1!important;white-space:nowrap!important}
+.heroSummary .heroMeta{font-size:9px!important;color:#89969e!important;line-height:1!important;white-space:nowrap!important;margin:0!important}
+@media(max-width:650px){.heroSummary>span{min-width:0!important;width:100%!important;white-space:normal!important}.heroSummary .heroMeta{white-space:normal!important}}
