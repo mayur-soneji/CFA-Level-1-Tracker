@@ -9,7 +9,7 @@ export const REWARDED_REVISION_CREDIT = REVISION_WEIGHT / totalLearningModules /
 export interface MockRecord { id: number; date: string; score: string; done: boolean; completedAt: string; }
 export interface StudyLog { id: string | number; date: string; hours: number; topic: string; focus: string; readingNumber?: number; readingTitle?: string; readingStatus?: "completed" | "incomplete"; }
 export interface RevisionTask { taskId: string; readingId: string; topicId: string; readingNumber: number; readingTitle: string; completionDate: string; reviewNumber: number; reviewType: "Day 1" | "Day 7" | "Day 21" | "Retention review"; dueDate: string; status: "pending" | "completed"; completedAt: string; rewardCredit: number; }
-export interface RevisionHistory extends RevisionTask { earnedCredit: number; }
+export interface RevisionHistory extends RevisionTask { rewardCredit: number; }
 export interface ReadingDone { [topicId: string]: number[]; }
 export interface ReadingAttempt { status?: string; credit?: number; at?: string; }
 export interface ReadingProgressEntry { status?: string; incompleteCount?: number; credit?: number; history?: ReadingAttempt[]; }
@@ -42,7 +42,7 @@ function freshRevisionTasks(topicId: string, readingNumber: number, completionDa
 const isMockRecord = (value: unknown): value is MockRecord => isObject(value) && typeof value.id === "number" && typeof value.date === "string" && typeof value.score === "string" && typeof value.done === "boolean" && typeof value.completedAt === "string";
 const isStudyLog = (value: unknown): value is StudyLog => isObject(value) && (typeof value.id === "string" || typeof value.id === "number") && typeof value.date === "string" && typeof value.hours === "number" && Number.isFinite(value.hours) && typeof value.topic === "string" && typeof value.focus === "string" && (value.readingNumber === undefined || (typeof value.readingNumber === "number" && Number.isInteger(value.readingNumber))) && (value.readingTitle === undefined || typeof value.readingTitle === "string") && (value.readingStatus === undefined || value.readingStatus === "completed" || value.readingStatus === "incomplete");
 const isRevisionTask = (value: unknown): value is RevisionTask => isObject(value) && typeof value.taskId === "string" && typeof value.readingId === "string" && typeof value.topicId === "string" && typeof value.readingNumber === "number" && typeof value.readingTitle === "string" && typeof value.completionDate === "string" && typeof value.reviewNumber === "number" && typeof value.reviewType === "string" && typeof value.dueDate === "string" && (value.status === "pending" || value.status === "completed") && typeof value.completedAt === "string" && typeof value.rewardCredit === "number" && Number.isFinite(value.rewardCredit);
-const isRevisionHistory = (value: unknown): value is RevisionHistory => isRevisionTask(value) && typeof value.earnedCredit === "number" && Number.isFinite(value.earnedCredit);
+const isRevisionHistory = (value: unknown): value is RevisionHistory => isRevisionTask(value) && typeof value.rewardCredit === "number" && Number.isFinite(value.rewardCredit);
 const isReadingDone = (value: unknown): value is ReadingDone => isObject(value) && Object.values(value).every(items => Array.isArray(items) && items.every(item => typeof item === "number" && Number.isInteger(item) && item > 0));
 const isReadingProgress = (value: unknown): value is ReadingProgress => isObject(value);
 
