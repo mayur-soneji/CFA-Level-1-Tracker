@@ -7,6 +7,7 @@ import './sticky-nav-fix.css';
 import './footer-cleanup.css';
 import './study-log-reading-dialog.css';
 import './liquid-glass.css';
+import './revision-redesign.css';
 import DataTransfer from './components/DataTransfer';
 import DynamicDateController from './components/DynamicDateController';
 import MockEmptyStateEnhancer from './components/MockEmptyStateEnhancer';
