@@ -4,3 +4,25 @@
 .readingStatusGroup{margin-top:16px}.readingStatusLabel{display:block;margin-bottom:7px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#89979f}.readingStatusOptions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.readingStatusOptions button{min-height:42px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:rgba(255,255,255,.03);color:#adb9bf;font:inherit;font-size:11px;font-weight:750;cursor:pointer}.readingStatusOptions button:hover{background:rgba(255,255,255,.055);color:#e9eff1}.readingStatusOptions button.selected{border-color:rgba(94,224,208,.5);background:rgba(82,213,192,.12);color:#c8fff6;box-shadow:inset 0 0 0 1px rgba(94,224,208,.12)}
 .readingDialogPreview{margin-top:16px;padding:12px 13px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(255,255,255,.025)}.readingDialogPreview>span{display:block;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#718089}.readingDialogPreview strong{display:block;margin-top:4px;font-size:12px;color:#b8c6ff}.readingDialogPreview p{margin:3px 0 0;font-size:11px;line-height:1.45;color:#d4dde1}.readingLogModal .modalActions{margin-top:18px}
 @media(max-width:650px){.readingDialogFields{grid-template-columns:1fr}.readingDialogHead h2{font-size:19px!important}.readingLogModal{padding:17px!important}}
+
+/* Study Log sizing alignment: match the surrounding compact form controls. */
+.logForm .readingDialogField{position:relative;padding-top:15px;font-size:0}
+.logForm .readingDialogField:before{content:attr(data-label);position:absolute;top:0;left:0;font-size:9px;font-weight:750;color:#98a5ab}
+.logForm .readingDialogField .readingDialogTrigger{min-height:36px;padding:8px 9px;border-radius:9px;font-size:11px}
+.readingLogModal{width:min(92vw,480px)!important}
+.readingDialogHead{gap:12px}
+.readingDialogHead h2{margin:4px 0 5px!important;font-size:20px!important}
+.modalClose{width:30px;height:30px;border-radius:8px;font-size:18px}
+.readingDialogFields{gap:9px;margin-top:14px}
+.readingDialogFields label{gap:5px;font-size:9px}
+.readingDialogFields select{min-height:36px;padding:8px 9px;border-radius:9px;font-size:11px}
+.readingStatusGroup{margin-top:13px}
+.readingStatusLabel{margin-bottom:6px;font-size:9px}
+.readingStatusOptions{gap:7px}
+.readingStatusOptions button{min-height:36px;border-radius:9px;font-size:11px}
+.readingDialogPreview{margin-top:13px;padding:10px 11px;border-radius:9px}
+.readingDialogPreview>span{font-size:8px}
+.readingDialogPreview strong{margin-top:3px;font-size:11px}
+.readingDialogPreview p{font-size:10px;line-height:1.4}
+.readingLogModal .modalActions{margin-top:14px}
+@media(max-width:650px){.readingLogModal{width:min(94vw,480px)!important}.readingLogModal{padding:16px!important}.readingDialogFields{gap:8px;margin-top:12px}}
