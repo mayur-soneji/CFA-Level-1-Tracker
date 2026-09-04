@@ -1,15 +1,20 @@
 # CFA Level I Tracker
 
-A structured study tracker for the **CFA Level I August 2027** exam.
+A reading-level study tracker for the **CFA Level I August 2027** exam.
 
-## Purpose
+## What it tracks
 
-Use this repository to organize the study roadmap, track progress, and keep CFA Level I preparation materials in one place.
+- 102 reading-level First Pass completions
+- Reading-linked Study Log sessions
+- Spaced-repetition Revision at Day 1, Day 7, Day 21, then every 21 days indefinitely
+- Revision readiness credit capped at 20%, with only the first three reviews per reading rewarded
+- 12 mocks contributing 30% of overall readiness
+- Browser-local persistence with JSON export/import and safe migration from earlier tracker versions
 
-## Status
+## Revision model
 
-🚧 **In progress** — study plan and tracker are being developed.
+Each completed reading gets its own revision schedule anchored to its completion date. The first three reviews each earn one-third of that reading's available revision credit; later 21-day reviews are retention work and earn no additional readiness credit.
 
 ## Goal
 
-Build a consistent, practical system for preparing for CFA Level I while keeping study progress easy to review and maintain.
+Build a consistent, practical system for preparing for CFA Level I while keeping reading progress, study time, revision retention, and mock performance easy to review and maintain.
