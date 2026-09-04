@@ -21,11 +21,7 @@ const isObject = (value: unknown): value is Record<string, unknown> => typeof va
 const today = () => new Date().toISOString().slice(0, 10);
 const parseDate = (value: string) => new Date(`${value}T12:00:00`);
 const addDays = (value: string, amount: number) => { const date = parseDate(value); date.setDate(date.getDate() + amount); return date.toISOString().slice(0, 10); };
-const topicNames: Record<string, string> = {
-  quantitativeMethods: "Quantitative Methods", financialStatementAnalysis: "Financial Statement Analysis", fixedIncome: "Fixed Income",
-  corporateFinance: "Corporate Finance", equities: "Equities", economics: "Economics", portfolioConstruction: "Portfolio Construction",
-  derivativesAndRiskManagement: "Derivatives and Risk Management", alternativeInvestments: "Alternative Investments", ethics: "Ethical and Professional Standards",
-};
+const topicNames: Record<string, string> = { quantitativeMethods: "Quantitative Methods", financialStatementAnalysis: "Financial Statement Analysis", fixedIncome: "Fixed Income", corporateFinance: "Corporate Finance", equities: "Equities", economics: "Economics", portfolioConstruction: "Portfolio Construction", derivativesAndRiskManagement: "Derivatives and Risk Management", alternativeInvestments: "Alternative Investments", ethics: "Ethical and Professional Standards" };
 const aliases: Record<string, string> = { quant: "quantitativeMethods", fsa1: "financialStatementAnalysis", fsa2: "financialStatementAnalysis", fi1: "fixedIncome", fi2: "fixedIncome", ci: "corporateFinance", equity: "equities", econ: "economics", pm: "portfolioConstruction", deriv: "derivativesAndRiskManagement", alts: "alternativeInvestments" };
 const normalizeTopic = (value: unknown) => aliases[String(value)] || String(value || "");
 const readingsFor = (topicId: string) => { const [start] = readingRanges[topicId as keyof typeof readingRanges] || [1]; return (curriculumReadings[topicId as keyof typeof curriculumReadings] || []).map((title, index) => ({ topicId, number: start + index, title, id: `${topicId}:${start + index}` })); };
@@ -33,7 +29,8 @@ const allReadings = Object.keys(topicNames).flatMap(readingsFor);
 const readingById = Object.fromEntries(allReadings.map(reading => [reading.id, reading]));
 
 function freshRevisionTasks(topicId: string, readingNumber: number, completionDate: string): RevisionTask[] {
-  const reading = readingById[`${topicId}:${readingNumber}`]; if (!reading) return [];
+  const reading = readingById[`${topicId}:${readingNumber}`];
+  if (!reading) return [];
   return [
     { taskId: `${reading.id}:d1`, readingId: reading.id, topicId, readingNumber, readingTitle: reading.title, completionDate, reviewNumber: 1, reviewType: "Day 1", dueDate: addDays(completionDate, 1), status: "pending", completedAt: "", rewardCredit: REWARDED_REVISION_CREDIT },
     { taskId: `${reading.id}:d7`, readingId: reading.id, topicId, readingNumber, readingTitle: reading.title, completionDate, reviewNumber: 2, reviewType: "Day 7", dueDate: addDays(completionDate, 7), status: "pending", completedAt: "", rewardCredit: REWARDED_REVISION_CREDIT },
@@ -59,14 +56,15 @@ function migrate(value: unknown): TrackerState {
   const readDone = Array.isArray(source.readDone) ? [...new Set(source.readDone.map(normalizeTopic).filter(id => topicNames[id]))] : [];
   const logs: StudyLog[] = Array.isArray(source.logs) ? source.logs.filter(isStudyLog).map(log => ({ ...log, topic: normalizeTopic(log.topic) })).filter(log => log.hours > 0) : [];
   const readingProgress = isReadingProgress(source.readingProgress) ? source.readingProgress : {};
+  const sourceReadingDone = isObject(source.readingDone) ? source.readingDone : {};
   const completionDates: Record<string, string> = isObject(source.completionDates) ? Object.fromEntries(Object.entries(source.completionDates).filter(([, value]) => typeof value === "string")) as Record<string, string> : {};
   const readingDone: ReadingDone = {};
   Object.keys(topicNames).forEach(topicId => {
-    const known = Array.isArray(source.readingDone?.[topicId]) ? source.readingDone[topicId] : [];
+    const known = Array.isArray(sourceReadingDone[topicId]) ? sourceReadingDone[topicId] : [];
     const progress = isObject(readingProgress[topicId]) ? readingProgress[topicId] : {};
     const inferred = Object.entries(progress).filter(([, item]) => isObject(item) && item.status === "completed").map(([number]) => Number(number));
     const topicComplete = readDone.includes(topicId) ? readingsFor(topicId).map(reading => reading.number) : [];
-    readingDone[topicId] = [...new Set([...known, ...inferred, ...topicComplete].filter(Number.isInteger))].sort((a, b) => a - b);
+    readingDone[topicId] = [...new Set([...known, ...inferred, ...topicComplete].filter(item => typeof item === "number" && Number.isInteger(item)))].sort((a, b) => a - b);
   });
   const revisionTasks: RevisionTask[] = Array.isArray(source.revisionTasks) ? source.revisionTasks.filter(isRevisionTask) : [];
   allReadings.forEach(reading => {
