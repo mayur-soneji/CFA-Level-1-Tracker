@@ -35,3 +35,14 @@
 .topicActions{gap:0!important}
 
 @media(max-width:650px){.topicReadingCheck{grid-template-columns:18px 72px minmax(120px,1fr) 34px!important;gap:8px!important;padding:10px!important;min-height:46px!important}.topicReadingNumber{font-size:9px!important}.topicReadingTitle{min-width:120px!important;font-size:10.5px!important;line-height:1.45!important}.topicReadingHours{font-size:9px!important}.topicReadingsHead{grid-template-columns:minmax(0,1fr) auto!important;padding:9px 10px!important}.topicReadingsList{max-height:280px}.topicReadingProgressMeta{grid-template-columns:1fr}.topicReadingProgressTime{justify-self:end}}
+
+/* Keep the reading status readable without shrinking the title column. */
+.topicReadingCheck{grid-template-columns:18px 86px minmax(0,1fr) 48px!important;grid-template-rows:auto auto!important;align-items:start!important;min-height:56px!important}
+.topicReadingCheckBox{grid-row:1 / span 2!important;align-self:center!important}
+.topicReadingNumber{grid-row:1!important;align-self:center!important}
+.topicReadingTitle{grid-row:1!important;min-width:0!important;width:auto!important}
+.topicReadingStatus{display:block!important;grid-column:3!important;grid-row:2!important;min-width:0!important;margin-top:2px!important;font-size:9px!important;line-height:1.25!important;color:#8fa0a8!important}
+.topicReadingsList li.isPartial .topicReadingStatus{color:#f2c88d!important}
+.topicReadingsList li.isLockedIncomplete .topicReadingStatus{color:#f3bd8d!important}
+.topicReadingHours{grid-row:1 / span 2!important;align-self:center!important}
+@media(max-width:650px){.topicReadingCheck{grid-template-columns:18px 66px minmax(0,1fr) 34px!important;min-height:58px!important}.topicReadingTitle{min-width:0!important}.topicReadingStatus{font-size:8px!important}}
