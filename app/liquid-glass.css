@@ -1,33 +1,8 @@
-/* Apple-inspired Liquid Glass — dark mode, with opaque frost where content overlaps. */
-:root{--glass-surface:rgba(18,23,34,.60);--glass-raised:rgba(31,38,54,.66);--glass-strong:rgba(10,14,22,.82);--glass-line:rgba(255,255,255,.15);--glass-highlight:rgba(255,255,255,.20);--glass-shadow:rgba(0,0,0,.36)}
-body{background:radial-gradient(900px 580px at -8% -12%,rgba(91,116,255,.25),transparent 62%),radial-gradient(820px 560px at 108% -5%,rgba(54,218,203,.16),transparent 61%),radial-gradient(700px 470px at 50% 108%,rgba(161,101,255,.14),transparent 66%),#05070c}
-body:before{background:linear-gradient(118deg,rgba(255,255,255,.055),transparent 24%,rgba(255,255,255,.012) 54%,rgba(255,255,255,.04));opacity:.75}
-.shell{max-width:1240px}
-.topbar{position:relative;padding:12px 16px 18px;border:1px solid transparent;border-radius:22px}
-.topbar:before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.075),transparent 44%);pointer-events:none;opacity:.6}
-.topbar>*{position:relative;z-index:1}
-.count{background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.045));border-color:rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.26),0 16px 40px rgba(0,0,0,.22);backdrop-filter:blur(22px) saturate(165%);-webkit-backdrop-filter:blur(22px) saturate(165%)}
-.nav{isolation:isolate;background:rgba(9,13,21,.76);border-color:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 16px 36px rgba(0,0,0,.28);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%)}
-.nav:before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(115deg,rgba(255,255,255,.11),transparent 33%);z-index:-1;pointer-events:none}
-.nav button{color:#b2bec7}.nav button:hover{background:rgba(255,255,255,.10);color:#fff}.nav button.active{box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 8px 22px rgba(76,109,220,.28)}
-.hero{background:linear-gradient(128deg,rgba(45,59,126,.72),rgba(20,29,47,.74) 48%,rgba(16,73,73,.62));border-color:rgba(174,193,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.055),0 28px 76px rgba(0,0,0,.27);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%)}
-.panel,.card,.topic,.mock,.readinessBreakdown,.dayCell,.dayPlan{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.035));border-color:var(--glass-line);box-shadow:inset 0 1px 0 var(--glass-highlight),inset 0 -1px 0 rgba(255,255,255,.025),0 18px 52px var(--glass-shadow);backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%)}
-.panel:before,.card:before,.topic:before,.mock:before,.readinessBreakdown:before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(125deg,rgba(255,255,255,.09),transparent 30%,rgba(255,255,255,.018) 68%);pointer-events:none}
-.panel>* ,.card>* ,.topic>* ,.mock>* ,.readinessBreakdown>*{position:relative;z-index:1}
-.panel{background:linear-gradient(135deg,rgba(23,29,41,.70),rgba(15,19,29,.58))}
-.card{background:linear-gradient(145deg,rgba(46,57,78,.52),rgba(20,25,36,.60))}
-.topic,.mock{background:linear-gradient(145deg,rgba(35,43,58,.62),rgba(16,21,31,.62))}
-.dayCell,.dayPlan{background:rgba(15,20,30,.60)}
-.dayCell:hover,.topic:hover,.mock:hover{border-color:rgba(190,208,255,.30);background:linear-gradient(145deg,rgba(53,65,88,.68),rgba(20,26,38,.68))}
-.primary{border-color:rgba(255,255,255,.27);box-shadow:inset 0 1px 0 rgba(255,255,255,.52),0 12px 30px rgba(74,107,225,.28)}
-.ghost{background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
-.logForm input,.logForm select,.mock input,.readingDialogFields select,.readingDialogTrigger{background:rgba(7,11,18,.62)!important;border-color:rgba(255,255,255,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.075);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.weekStats>div,.nextState,.phaseBanner,.readingDialogPreview,.topicReadingsBody{background:rgba(9,14,22,.52)!important;border-color:rgba(255,255,255,.11)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.075)}
-/* Dialogs and all sticky/floating elements use denser frost for legibility over the page. */
-.modalBackdrop{background:rgba(2,4,9,.68)!important;backdrop-filter:blur(15px) saturate(120%);-webkit-backdrop-filter:blur(15px) saturate(120%)}
-.modal,.readingLogModal{background:linear-gradient(145deg,rgba(32,39,54,.93),rgba(12,17,27,.91))!important;border:1px solid rgba(255,255,255,.20)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 28px 90px rgba(0,0,0,.52)!important;backdrop-filter:blur(34px) saturate(165%);-webkit-backdrop-filter:blur(34px) saturate(165%)}
-.dataTransfer{background:linear-gradient(135deg,rgba(25,32,46,.76),rgba(12,17,27,.72))!important;border-color:rgba(255,255,255,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 18px 48px rgba(0,0,0,.28)!important;backdrop-filter:blur(26px) saturate(155%);-webkit-backdrop-filter:blur(26px) saturate(155%)}
-@media(max-width:650px){.topbar{padding:8px 4px 14px}.nav{top:8px;background:rgba(7,11,18,.88)}.panel,.card,.topic,.mock,.readinessBreakdown{backdrop-filter:blur(18px) saturate(145%);-webkit-backdrop-filter:blur(18px) saturate(145%)}}
-
-/* The readiness formula was intentionally removed from the application footer. */
-.shell footer{display:none!important}
+/* Revision workspace: denser frost for navigation, overlays, and scrollable lists. */
+.nav { background: rgba(8,12,23,.86); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+.modalBackdrop { background: rgba(1,4,10,.70); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.glassDialog { background: linear-gradient(145deg,rgba(17,23,40,.96),rgba(10,14,27,.98)); border:1px solid rgba(255,255,255,.11); box-shadow:0 32px 90px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.05); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); }
+.revisionTaskRow { background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.075); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+.revisionControls { background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
+.topicReadingsList { scrollbar-color:rgba(255,255,255,.18) transparent; }
+@media (max-width:700px){.nav{position:sticky;top:0;z-index:20}.revisionTaskRow{grid-template-columns:1fr}.revisionTaskMeta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.readingDialogFields{grid-template-columns:1fr}}
