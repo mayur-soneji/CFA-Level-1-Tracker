@@ -381,3 +381,51 @@
     margin-top: 14px !important;
   }
 }
+
+
+/* The revision readiness card also has the legacy `.revision` class.
+   Explicitly reset that legacy task-row layout inside the dashboard. */
+.readinessBars .readinessBar.revision {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  border-top: 1px solid rgba(255,255,255,.10) !important;
+}
+
+.readinessBars .readinessBar.revision > * {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  width: auto;
+  text-align: initial !important;
+}
+
+.readinessBars .readinessBar.revision .readinessBarMeta {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+}
+
+.readinessBars .readinessBar.revision .readinessBarTrack,
+.readinessBars .readinessBar.revision .bar {
+  display: block !important;
+  width: 100% !important;
+  height: 8px !important;
+  min-height: 8px !important;
+  margin: 15px 0 10px !important;
+}
+
+.readinessBars .readinessBar.revision .bar i,
+.readinessBars .readinessBar.revision .readinessBarTrack > span {
+  display: block !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.readinessBars .readinessBar.revision p {
+  width: 100% !important;
+  text-align: left !important;
+}
