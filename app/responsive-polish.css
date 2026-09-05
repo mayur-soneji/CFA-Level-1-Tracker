@@ -1,0 +1,274 @@
+/* Responsive layout polish: spacious desktop dashboard and intentional mobile flow. */
+
+@media (min-width: 1100px) {
+  .shell {
+    max-width: 1360px;
+    padding: 44px 40px 88px;
+  }
+
+  .topbar {
+    padding: 12px 4px 30px;
+  }
+
+  .topbar h1 {
+    font-size: clamp(46px, 4vw, 58px);
+  }
+
+  .topbar p {
+    max-width: 720px;
+    font-size: 15px;
+  }
+
+  .count {
+    min-width: 168px;
+    padding: 15px 18px;
+  }
+
+  .count strong {
+    font-size: 38px;
+  }
+
+  .nav {
+    margin-bottom: 26px;
+    padding: 6px;
+  }
+
+  .nav button {
+    padding: 10px 17px;
+    font-size: 13px;
+  }
+
+  .dashboardHero {
+    min-height: 290px;
+    padding: 42px 46px;
+    gap: 56px;
+  }
+
+  .dashboardHero h2 {
+    max-width: 760px;
+    font-size: clamp(32px, 3vw, 42px);
+    line-height: 1.08;
+  }
+
+  .dashboardHero p {
+    max-width: 760px;
+    font-size: 16px;
+  }
+
+  .readinessWrap {
+    padding: 18px;
+  }
+
+  .weightedRing {
+    width: 164px;
+    height: 164px;
+  }
+
+  .readinessBars {
+    gap: 16px;
+    margin: 18px 0;
+    padding: 24px;
+  }
+
+  .readinessBarsHead h2 {
+    font-size: 26px;
+  }
+
+  .readinessBar {
+    min-height: 132px;
+    padding: 18px;
+  }
+
+  .readinessBarMeta > span {
+    font-size: 12px;
+  }
+
+  .readinessBarMeta strong {
+    font-size: 19px;
+  }
+
+  .readinessBar p {
+    font-size: 11px;
+  }
+
+  .panel {
+    padding: 28px 30px;
+    margin-bottom: 18px;
+  }
+
+  .revisionTodayPanel {
+    min-height: 420px;
+  }
+
+  .panelHead h2 {
+    font-size: 28px;
+  }
+
+  .panelHead p {
+    font-size: 14px;
+  }
+
+  .dataTransfer {
+    margin-top: 18px !important;
+    max-width: 1360px !important;
+    padding: 22px 26px !important;
+  }
+}
+
+@media (max-width: 650px) {
+  .shell {
+    padding: 24px 14px 58px;
+  }
+
+  .topbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 8px 2px 16px;
+  }
+
+  .topbar h1 {
+    font-size: clamp(38px, 12vw, 48px);
+    line-height: .98;
+  }
+
+  .topbar p {
+    max-width: 31ch;
+    font-size: 14px;
+  }
+
+  .count {
+    width: min(100%, 320px);
+    min-width: 0;
+    text-align: left;
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  .count strong {
+    font-size: 34px;
+  }
+
+  .nav {
+    position: sticky !important;
+    top: 8px !important;
+    width: 100%;
+    max-width: none;
+    min-height: 50px;
+    margin: 0 0 16px;
+    padding: 5px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 12px;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 30px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 30px), transparent 100%);
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav button {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    scroll-snap-align: start;
+  }
+
+  .hero,
+  .dashboardHero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 22px;
+    padding: 22px 20px;
+    border-radius: 18px;
+  }
+
+  .dashboardHero {
+    min-height: 0;
+  }
+
+  .hero h2,
+  .dashboardHero h2 {
+    font-size: clamp(25px, 7.4vw, 31px);
+    line-height: 1.1;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .readinessWrap {
+    align-self: center;
+    padding: 12px;
+  }
+
+  .weightedRing {
+    width: 122px;
+    height: 122px;
+  }
+
+  .readinessBars {
+    gap: 10px;
+    padding: 15px;
+    margin: 12px 0;
+  }
+
+  .readinessBar {
+    padding: 14px;
+  }
+
+  .panel {
+    padding: 18px 16px;
+    margin-bottom: 14px;
+  }
+
+  .panelHead {
+    gap: 14px;
+  }
+
+  .panelHead .primary,
+  .panelHead .ghost {
+    width: 100%;
+  }
+
+  .mockGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .mock {
+    padding: 16px;
+  }
+
+  .dataTransfer {
+    margin-top: 12px !important;
+    padding: 18px 16px !important;
+  }
+
+  .dataTransferActions {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 9px !important;
+  }
+
+  .dataTransferActions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav button {
+    padding-inline: 12px;
+    font-size: 11px;
+  }
+
+  .topbar h1 {
+    font-size: 38px;
+  }
+}
